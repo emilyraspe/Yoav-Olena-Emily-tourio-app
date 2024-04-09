@@ -11,6 +11,15 @@ export default async function handler(request, response) {
     return;
   }
 
+  if (request.method === "PATCH") {
+    await Place.findByIdAndUpdate(id, {
+      $set: request.body,
+    });
+    response.status(200).json({
+      status: `Place ${id} updated!`,
+    });
+  }
+
   const place = await Place.findById(id);
   const comment = place?.comments;
   const allCommentIds = comment?.map((comment) => comment.$oid) || [];
