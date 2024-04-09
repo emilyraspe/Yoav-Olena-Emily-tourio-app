@@ -20,6 +20,13 @@ export default async function handler(request, response) {
     });
   }
 
+  if (request.method === "DELETE") {
+    await Place.findByIdAndDelete(id);
+    response
+      .status(200)
+      .json({ status: "Nobody wants to visit this place anyways" });
+  }
+
   const place = await Place.findById(id);
   const comment = place?.comments;
   const allCommentIds = comment?.map((comment) => comment.$oid) || [];

@@ -41,13 +41,17 @@ export default function DetailsPage() {
 
   if (!isReady || isLoading || error) return <h2>Loading...</h2>;
 
-  function deletePlace() {
+  async function deletePlace() {
     console.log("deleted?");
+    await fetch(`/api/places/${id}`, {
+      method: "DELETE",
+    });
+    router.push("/");
   }
 
   return (
     <>
-      <Link href={'/'} passHref legacyBehavior>
+      <Link href={"/"} passHref legacyBehavior>
         <StyledLink justifySelf="start">back</StyledLink>
       </Link>
       <ImageContainer>
