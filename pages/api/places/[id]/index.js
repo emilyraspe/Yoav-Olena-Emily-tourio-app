@@ -1,12 +1,12 @@
-import { db_places } from "../../../../lib/db_places";
-import { db_comments } from "../../../../lib/db_comments";
+// import { db_comments } from "../../../../lib/db_comments";
 import dbConnect from "../../../../db/connect";
 import Place from "../../../../db/models/Place";
+import Comment from "../../../../db/models/Comment";
 
 export default async function handler(request, response) {
-  await dbConnect();
   const { id } = request.query;
 
+  await dbConnect();
   if (!id) {
     return;
   }
@@ -27,16 +27,37 @@ export default async function handler(request, response) {
       .json({ status: "Nobody wants to visit this place anyways" });
   }
 
-  const place = await Place.findById(id);
-  const comment = place?.comments;
-  const allCommentIds = comment?.map((comment) => comment.$oid) || [];
-  const comments = db_comments.filter((comment) =>
-    allCommentIds.includes(comment._id.$oid)
-  );
-
-  if (!place) {
-    return response.status(404).json({ status: "Not found" });
+  if (request.method === "GET") {
+    const test = await Place.findById(id).populate("comments");
+    if (!test) {
+      return response.status(404).json({ status: "page not found" }); // added no data case
+    }
+    return response.status(200).json(test);
   }
 
-  response.status(200).json({ place: place, comments: comments });
+  // const place = await Place.findById(id);
+
+  // const comment = place?.comments;
+  // const allCommentIds = comment?.map((comment) => comment.$oid) || [];
+  // const comments = db_comments.filter((comment) =>
+  //   allCommentIds.includes(comment._id.$oid)
+  // );
+  // if (!place) {
+  //   return response.status(404).json({ status: "Not found" });
+  // }
+
+  if (request.method === "POST") {
+    console.log("========================", request.body);
+    try {
+      const newComment = await Comment.create(request.body);
+      await Place.findByIdAndUpdate(
+        id,
+        { $push: { comments: newComment._id } },
+        { new: true }
+      );
+      response.status(200).json({ status: "uploaded new comment" });
+    } catch (error) {
+      response.status(500).json({ error: "error uploading" });
+    }
+  }
 }

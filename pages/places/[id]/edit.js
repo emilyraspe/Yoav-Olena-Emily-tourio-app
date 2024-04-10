@@ -23,7 +23,7 @@ export default function EditPage() {
       body: JSON.stringify(place),
     }); //we might nneed to change this to ../api...
     if (response.ok) {
-      mutate();
+      router.push(`/places/${id}`);
     }
   }
 
